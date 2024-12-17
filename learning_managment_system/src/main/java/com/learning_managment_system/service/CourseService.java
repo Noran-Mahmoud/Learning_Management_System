@@ -26,17 +26,17 @@ public class CourseService {
         this.lessonRepository = lessonRepository;
     }
 
-    // إنشاء دورة جديدة
+    
     public Course createCourse(Course course) {
         return courseRepository.save(course);
     }
 
-    // جلب الدورات الخاصة بمدرس معين
+    
     public List<Course> getCoursesByInstructor(Long instructorId) {
         return courseRepository.findByInstructorId(instructorId);
     }
 
-    // رفع ملفات الوسائط
+    
     public String uploadMediaFile(MultipartFile file) {
         try {
             String uploadDir = "media_files/";
@@ -49,7 +49,7 @@ public class CourseService {
         }
     }
 
-    // إضافة درس إلى دورة
+    
     public Lesson addLessonToCourse(Long courseId, Lesson lesson) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
@@ -59,35 +59,35 @@ public class CourseService {
         return lesson;
     }
 
-    // توليد OTP خاص بدروس الحضور
+    
     public String generateOtpForLesson(Long lessonId) {
-        // جلب الدرس
+        
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
-        // توليد OTP عشوائي من 6 أرقام
+        
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
 
-        // تحديث قيم OTP في الدرس
+        
         lesson.setOtp(otp);
         lesson.setOtpGeneratedAt(LocalDateTime.now());
 
-        // حفظ التحديثات في قاعدة البيانات
+        
         lessonRepository.save(lesson);
 
-        return otp; // إرجاع الـ OTP
+        return otp; 
     }
 
-    // التحقق من صحة الـ OTP
+    
     public boolean verifyOtp(Long lessonId, String otp) {
-        // جلب الدرس
+        
         Optional<Lesson> optionalLesson = lessonRepository.findById(lessonId);
         if (optionalLesson.isEmpty()) {
             throw new RuntimeException("Lesson not found");
         }
 
         Lesson lesson = optionalLesson.get();
-        // التحقق من مطابقة الـ OTP المُدخل مع المحفوظ
+        
         return lesson.getOtp() != null && lesson.getOtp().equals(otp);
     }
 }
