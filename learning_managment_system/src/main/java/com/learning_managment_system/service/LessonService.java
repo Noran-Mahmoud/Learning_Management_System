@@ -39,13 +39,13 @@ public class LessonService {
     public String getOTPForLesson(Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
-        return lesson.getOtp(); // إرجاع الـ OTP الخاص بالدرس
+        return lesson.getOtp();
     }
 
-    // دالة لتوليد OTP عشوائي مكون من 6 أرقام
+    
     private String generateOtp() {
         Random random = new Random();
-        int otp = 100000 + random.nextInt(900000); // توليد رقم عشوائي بين 100000 و 999999
+        int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
     }
 }
