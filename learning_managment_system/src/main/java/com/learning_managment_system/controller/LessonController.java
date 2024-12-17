@@ -15,7 +15,7 @@ public class LessonController {
         this.lessonService = lessonService;
     }
 
-    // توليد OTP لدرس معين
+    
     @PostMapping("/{lessonId}/generate-otp")
     public ResponseEntity<String> generateOTP(@PathVariable Long lessonId) {
         Lesson lesson = lessonService.generateOtpForLesson(lessonId);
@@ -24,7 +24,7 @@ public class LessonController {
     }
 
 
-    // استرجاع OTP لدرس معين
+    
     @GetMapping("/{lessonId}/otp")
     public ResponseEntity<String> getOTP(@PathVariable Long lessonId) {
         String otp = lessonService.getOTPForLesson(lessonId);
