@@ -18,19 +18,19 @@ public class LessonService {
         this.lessonRepository = lessonRepository;
     }
 
-    // دالة لتوليد OTP للدرس
+    
     public Lesson generateOtpForLesson(Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
-        // توليد OTP عشوائي
+        
         String otp = generateOtp();
         lesson.setOtp(otp);
 
-        // تعيين الوقت الذي تم فيه توليد الـ OTP
+        
         lesson.setOtpGeneratedAt(LocalDateTime.now());
 
-        // حفظ التغييرات في الدرس
+        
         lessonRepository.save(lesson);
 
         return lesson;
