@@ -127,5 +127,33 @@ public class UserServiceTest {
         assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(user.getUsername()));
     }
 
+     @Test
+    void testUpdateUserProfile_Success() {
+
+        User existingUser = new User();
+        existingUser.setUsername("Yasmeen");
+        existingUser.setFirstName("yasmeen");
+        existingUser.setLastName("Yahia");
+        existingUser.setPhoneNumber("123456789");
+        existingUser.setEmail("yasmeen@gmail.com");
+
+        User updatedUser = new User();
+        updatedUser.setFirstName("Yasmine");
+        updatedUser.setLastName("Yahya");
+        updatedUser.setPhoneNumber("1234");
+        updatedUser.setEmail("yasminey@gmail.com");
+        when(userRepository.findByUsername("Yasmeen")).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+        User result = userService.updateUserProfile("Yasmeen", updatedUser);
+
+        assertNotNull(result);
+        assertEquals("Yasmine", result.getFirstName());
+        assertEquals("Yahya", result.getLastName());
+        assertEquals("1234", result.getPhoneNumber());
+        assertEquals("yasminey@gmail.com", result.getEmail());
+        verify(userRepository, times(1)).save(existingUser);
+    }
+
+
 }
 
