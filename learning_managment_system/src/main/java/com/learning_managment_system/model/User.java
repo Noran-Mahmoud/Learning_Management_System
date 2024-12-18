@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import java.util.List;
 @Entity
 @Getter@Setter@NoArgsConstructor
 public class User {
@@ -21,5 +21,11 @@ public class User {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-
+    @ManyToMany
+    @JoinTable(
+        name = "enrollments",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> enrolledCourses;
 }
