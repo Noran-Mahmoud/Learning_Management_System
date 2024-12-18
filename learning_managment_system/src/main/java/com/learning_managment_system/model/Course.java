@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import java.util.List;
 import java.util.Set;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
@@ -24,14 +24,8 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     private User instructor;
-
-    @ManyToMany
-    @JoinTable(
-            name = "course_student",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private Set<User> students;
+    @ManyToMany(mappedBy = "enrolledCourses")
+    private List<User> enrolledStudents;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonManagedReference
