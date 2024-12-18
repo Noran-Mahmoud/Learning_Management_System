@@ -2,13 +2,15 @@ package com.learning_managment_system.service;
 
 import com.learning_managment_system.model.User;
 import com.learning_managment_system.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
@@ -16,7 +18,9 @@ public class UserService {
     }
 
     public User registerUser(User user) {
-        // Add business logic for user registration (e.g., encrypt password, validate role)
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new RuntimeException("Username is already taken");
+        }
         return userRepository.save(user);
     }
 
@@ -49,5 +53,20 @@ public class UserService {
     public void deleteUser(String username) {
         User user = getUserByUsername(username);
         userRepository.delete(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+
+
+        return org.springframework.security.core.userdetails.User
+            .builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .roles(user.getRole())
+            .build();
     }
 }
