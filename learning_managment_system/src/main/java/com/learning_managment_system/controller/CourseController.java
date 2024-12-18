@@ -1,5 +1,6 @@
 package com.learning_managment_system.controller;
-import org.springframework.security.access.annotation.Secured;
+import com.learning_managment_system.dto.CourseDTO;
+import com.learning_managment_system.dto.CourseEnrollmentDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.learning_managment_system.model.Course;
@@ -7,8 +8,8 @@ import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.service.CourseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -45,30 +46,55 @@ public class CourseController {
     }
 
 
-    @PreAuthorize("hasRole('INSTRUCTOR')")
-    @GetMapping("/instructor/{instructorId}")
-    public ResponseEntity<List<Course>> getCoursesByInstructor(@PathVariable Long instructorId) {
-        List<Course> courses = courseService.getCoursesByInstructor(instructorId);
+    @GetMapping("/all")
+    public ResponseEntity<List<CourseDTO>> getCourses() {
+        List<CourseDTO> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);
     }
+    // Enroll in a course
+    @PostMapping("/{courseId}/enroll")
+    @PreAuthorize("hasRole('STUDENT')") // Ensure only students can access
+    public ResponseEntity<String> enrollInCourse(@PathVariable Long courseId, Authentication authentication) {
+        String username = authentication.getName();
+        courseService.enrollInCourse(courseId, username);
+        return ResponseEntity.ok("Enrolled successfully");
+    }
+
+    @GetMapping("/{courseId}/students")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')") // Restrict to Admins and Instructors
+    public ResponseEntity<CourseEnrollmentDTO> getEnrolledStudents(@PathVariable Long courseId) {
+        CourseEnrollmentDTO courseEnrollment = courseService.getEnrolledStudents(courseId);
+        return ResponseEntity.ok(courseEnrollment);
+    }
+
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    @PutMapping("/{courseId}")
-    public ResponseEntity<Course> updateCourse(
-            @PathVariable Long courseId,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("duration") String duration,
-            @RequestParam(value = "mediaFileUrl", required = false) String mediaFileUrl
-    ) {
-        Course updatedCourse = new Course();
-        updatedCourse.setTitle(title);
-        updatedCourse.setDescription(description);
-        updatedCourse.setDuration(duration);
-        updatedCourse.setMediaFileUrl(mediaFileUrl);
+    @GetMapping("/instructor/{instructorId}")
+    public ResponseEntity<List<CourseDTO>> getCoursesByInstructor(@PathVariable Long instructorId) {
+        List<CourseDTO> courseDTOs = courseService.getCoursesByInstructor(instructorId);
+        return ResponseEntity.ok(courseDTOs);
+    }
 
-        Course course = courseService.updateCourse(courseId, updatedCourse);
-        return ResponseEntity.ok(course);
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PatchMapping("/{courseId}")
+    public ResponseEntity<CourseDTO> updateCourse(
+        @PathVariable Long courseId,
+        @RequestParam(value = "title", required = false) String title,
+        @RequestParam(value = "description", required = false) String description,
+        @RequestParam(value = "duration", required = false) String duration,
+        @RequestParam(value = "mediaFileUrl", required = false) String mediaFileUrl
+    ) {
+
+        Course partialUpdate = new Course();
+        partialUpdate.setTitle(title);
+        partialUpdate.setDescription(description);
+        partialUpdate.setDuration(duration);
+        partialUpdate.setMediaFileUrl(mediaFileUrl);
+
+
+        CourseDTO updatedCourse = courseService.updateCourse(courseId, partialUpdate);
+        return ResponseEntity.ok(updatedCourse);
     }
 
 
