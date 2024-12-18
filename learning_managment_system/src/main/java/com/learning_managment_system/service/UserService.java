@@ -41,14 +41,24 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public User updateUserProfile(String username, User updatedUser) {
-        User existingUser = getUserByUsername(username);
+public User updateUserProfile(String username, User updatedUser) {
+    User existingUser = getUserByUsername(username);
+
+    if (updatedUser.getFirstName() != null) {
         existingUser.setFirstName(updatedUser.getFirstName());
-        existingUser.setLastName(updatedUser.getLastName());
-        existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
-        existingUser.setEmail(updatedUser.getEmail());
-        return userRepository.save(existingUser);
     }
+    if (updatedUser.getLastName() != null) {
+        existingUser.setLastName(updatedUser.getLastName());
+    }
+    if (updatedUser.getPhoneNumber() != null) {
+        existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+    }
+    if (updatedUser.getEmail() != null) {
+        existingUser.setEmail(updatedUser.getEmail());
+    }
+
+    return userRepository.save(existingUser);
+}
 
     public void deleteUser(String username) {
         User user = getUserByUsername(username);
