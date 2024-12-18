@@ -59,6 +59,28 @@ public class CourseService {
         return lesson;
     }
 
+
+    public Course updateCourse(Long courseId, Course updatedCourse) {
+        Optional<Course> existingCourseOpt = courseRepository.findById(courseId);
+        if (existingCourseOpt.isPresent()) {
+            Course existingCourse = existingCourseOpt.get();
+            existingCourse.setTitle(updatedCourse.getTitle());
+            existingCourse.setDescription(updatedCourse.getDescription());
+            existingCourse.setDuration(updatedCourse.getDuration());
+            existingCourse.setMediaFileUrl(updatedCourse.getMediaFileUrl());
+            return courseRepository.save(existingCourse);
+        } else {
+            throw new RuntimeException("Course not found");
+        }
+    }
+
+    public void deleteCourse(Long courseId) {
+        if (courseRepository.existsById(courseId)) {
+            courseRepository.deleteById(courseId);
+        } else {
+            throw new RuntimeException("Course not found");
+        }
+    }
     
     public String generateOtpForLesson(Long lessonId) {
         
