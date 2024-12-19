@@ -2,11 +2,13 @@ package com.learning_managment_system.controller;
 
 import com.learning_managment_system.model.User;
 import com.learning_managment_system.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,23 +36,24 @@ public class UserController {
     // Get all users (Admin only)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
+        List<Map<String, Object>> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
     // The account holder or admin only
-   @PreAuthorize("hasRole('ADMIN') or principal.username == #username")
+    @PreAuthorize("hasRole('ADMIN') or principal.username == #username")
     @GetMapping("/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        User user = userService.getUserByUsername(username);
+    public ResponseEntity<Map<String, Object>> getUserByUsername(@PathVariable String username) {
+        Map<String, Object> user = userService.getUserDataByUsername(username);
         return ResponseEntity.ok(user);
     }
     // The account holder or admin only
     @PreAuthorize("hasRole('ADMIN') or principal.username == #username")
-    @PatchMapping("/{username}/profile")
-    public ResponseEntity<User> updateUserProfile(@PathVariable String username, @RequestBody User updatedUser) {
-        User user = userService.updateUserProfile(username, updatedUser);
-        return ResponseEntity.ok(user);
+    @PatchMapping("/update/{username}")
+    public ResponseEntity<Map<String, Object>> updateUserProfile(@PathVariable String username, @RequestBody User updatedUser) {
+
+            Map<String, Object> updatedUserData = userService.updateUserProfile(username, updatedUser);
+            return ResponseEntity.ok(updatedUserData);
     }
 
 
@@ -61,4 +64,15 @@ public class UserController {
         userService.deleteUser(username);
         return ResponseEntity.ok("User deleted successfully");
     }
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @DeleteMapping("/removeStudent/{studentId}/fromCourse/{courseId}")
+    public ResponseEntity<String> removeStudentFromCourse(@PathVariable Long studentId, @PathVariable Long courseId) {
+        try {
+            userService.removeStudentFromCourse(studentId, courseId);
+            return ResponseEntity.ok("Student removed from course successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
+        }
+    }
+
 }
