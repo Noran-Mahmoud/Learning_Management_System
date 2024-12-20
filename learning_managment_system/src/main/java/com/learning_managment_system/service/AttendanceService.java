@@ -20,41 +20,37 @@ public class AttendanceService {
     @Autowired
     private LessonAttendanceRepository lessonAttendanceRepository;
 
-
-    public String generateOtpForLesson(Long lessonId) {
+    public String generateOtpForLesson(Long lessonId, Long studentId) {
         Optional<Lesson> lesson = lessonRepository.findById(lessonId);
         if (lesson.isPresent()) {
             String otp = generateOtp();
+
             LessonAttendance attendance = new LessonAttendance();
             attendance.setLesson(lesson.get());
             attendance.setOtp(otp);
             attendance.setGeneratedAt(LocalDateTime.now());
+            attendance.setValidated(false);
+            attendance.setStudentId(studentId);
+
             lessonAttendanceRepository.save(attendance);
+
             return otp;
         } else {
-            throw new IllegalArgumentException("Lesson not found with id: " + lessonId);
+            throw new IllegalArgumentException("Lesson not found");
         }
     }
 
-    public boolean validateOtp(Long lessonId, String otp) {
-        Optional<LessonAttendance> attendance = lessonAttendanceRepository.findByLessonIdAndOtp(lessonId, otp);
-        if (attendance.isPresent()) {
+    public boolean validateOtp(Long lessonId, Long studentId, String otp) {
+        Optional<LessonAttendance> attendance = lessonAttendanceRepository.findByLessonIdAndStudentIdAndOtp(lessonId, studentId, otp);
+        if (attendance.isPresent() && !attendance.get().isValidated()) {
             LessonAttendance record = attendance.get();
-            if (record.isValidated()) {
-                return false;
-            }
-
-
             record.setValidated(true);
             record.setValidatedAt(LocalDateTime.now());
             lessonAttendanceRepository.save(record);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
-
-
 
     private String generateOtp() {
         SecureRandom random = new SecureRandom();
