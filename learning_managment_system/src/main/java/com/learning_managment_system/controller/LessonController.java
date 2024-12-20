@@ -1,33 +1,31 @@
 package com.learning_managment_system.controller;
 
-import com.learning_managment_system.model.Lesson;
-import com.learning_managment_system.service.LessonService;
+
+
+import com.learning_managment_system.service.AttendanceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/lessons")
 public class LessonController {
 
-    private final LessonService lessonService;
+    @Autowired
+    private AttendanceService attendanceService;
 
-    public LessonController(LessonService lessonService) {
-        this.lessonService = lessonService;
-    }
-
-    
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/{lessonId}/generate-otp")
-    public ResponseEntity<String> generateOTP(@PathVariable Long lessonId) {
-        Lesson lesson = lessonService.generateOtpForLesson(lessonId);
-        String otpDetails = String.format("OTP Generated: %s at %s", lesson.getOtp(), lesson.getOtpGeneratedAt());
-        return ResponseEntity.ok(otpDetails);  // تضمين الوقت في الاستجابة
+    public ResponseEntity<String> generateOtp(@PathVariable Long lessonId) {
+        String otp = attendanceService.generateOtpForLesson(lessonId);
+        return ResponseEntity.ok(otp);
     }
 
-
-    
-    @GetMapping("/{lessonId}/otp")
-    public ResponseEntity<String> getOTP(@PathVariable Long lessonId) {
-        String otp = lessonService.getOTPForLesson(lessonId);
-        return ResponseEntity.ok("Current OTP: " + otp);
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/{lessonId}/validate-otp")
+    public ResponseEntity<Boolean> validateOtp(@PathVariable Long lessonId, @RequestParam String otp) {
+        boolean isValid = attendanceService.validateOtp(lessonId, otp);
+        return ResponseEntity.ok(isValid);
     }
 }
