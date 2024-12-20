@@ -22,6 +22,16 @@ public class LessonAttendance {
 
     private LocalDateTime validatedAt;
 
+    @Column(nullable = false)
+    private Long studentId;
+
+    public Long getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
+    }
 
     // Getters and Setters
     public Long getId() {
