@@ -9,7 +9,5 @@ import java.util.Optional;
 @Repository
 public interface LessonAttendanceRepository extends JpaRepository<LessonAttendance, Long> {
 
-    Optional<LessonAttendance> findByLessonIdAndOtp(Long lessonId, String otp);
-
-
+    Optional<LessonAttendance> findByLessonIdAndStudentIdAndOtp(Long lessonId, Long studentId, String otp);
 }
