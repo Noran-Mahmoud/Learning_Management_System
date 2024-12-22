@@ -1,5 +1,6 @@
 package com.learning_managment_system.service;
 
+import com.learning_managment_system.dto.CourseDTO;
 import com.learning_managment_system.model.Course;
 import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.repository.CourseRepository;
@@ -97,7 +98,7 @@ public class CourseServiceTest {
 
         when(courseRepository.findById(1L)).thenReturn(Optional.of(course));
         when(courseRepository.save(course)).thenReturn(course);
-        Course result = courseService.updateCourse(1L, updatedCourse);
+        CourseDTO result = courseService.updateCourse(1L, updatedCourse);
         assertNotNull(result);
         assertEquals("Updated Course", result.getTitle());
         verify(courseRepository, times(1)).save(course);
