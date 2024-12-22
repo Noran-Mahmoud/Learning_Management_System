@@ -1,8 +1,6 @@
 package com.learning_managment_system.service;
 
-import com.learning_managment_system.dto.CourseDTO;
 import com.learning_managment_system.model.Course;
-import com.learning_managment_system.dto.CourseEnrollmentDTO;
 import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.model.User;
 import com.learning_managment_system.repository.CourseRepository;
@@ -16,9 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,21 +35,6 @@ public class CourseService {
     public Course createCourse(Course course) {
         return courseRepository.save(course);
     }
-
-
-public List<CourseDTO> getCoursesByInstructor(Long instructorId) {
-    return courseRepository.findByInstructorId(instructorId).stream()
-        .map(course -> new CourseDTO(
-            course.getId(),
-            course.getTitle(),
-            course.getDescription(),
-            course.getDuration(),
-            course.getMediaFileUrl()
-        ))
-        .collect(Collectors.toList());
-}
-
-
 
     public String uploadMediaFile(MultipartFile file) {
         try {
@@ -76,7 +57,9 @@ public List<CourseDTO> getCoursesByInstructor(Long instructorId) {
         courseRepository.save(course);
         return lesson;
     }
-    public CourseDTO updateCourse(Long courseId, Course updatedCourse) {
+
+
+    public Map<String, Object> updateCourse(Long courseId, Course updatedCourse) {
         Optional<Course> existingCourseOpt = courseRepository.findById(courseId);
 
         if (existingCourseOpt.isPresent()) {
@@ -95,21 +78,21 @@ public List<CourseDTO> getCoursesByInstructor(Long instructorId) {
                 existingCourse.setMediaFileUrl(updatedCourse.getMediaFileUrl());
             }
 
-
             Course savedCourse = courseRepository.save(existingCourse);
 
-            return new CourseDTO(
-                savedCourse.getId(),
-                savedCourse.getTitle(),
-                savedCourse.getDescription(),
-                savedCourse.getDuration(),
-                savedCourse.getMediaFileUrl()
-            );
+
+            Map<String, Object> courseData = new HashMap<>();
+            courseData.put("id", savedCourse.getId());
+            courseData.put("title", savedCourse.getTitle());
+            courseData.put("description", savedCourse.getDescription());
+            courseData.put("duration", savedCourse.getDuration());
+            courseData.put("mediaFileUrl", savedCourse.getMediaFileUrl());
+
+            return courseData;
         } else {
             throw new RuntimeException("Course not found");
         }
     }
-
 
 
     public void deleteCourse(Long courseId) {
@@ -152,17 +135,28 @@ public List<CourseDTO> getCoursesByInstructor(Long instructorId) {
     }
 
 
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courses = courseRepository.findAll();
-        return courses.stream()
-            .map(course -> new CourseDTO(
-                course.getId(),
-                course.getTitle(),
-                course.getDescription(),
-                course.getDuration(),
-                course.getMediaFileUrl()))
+public List<Map<String, Object>> getAvailableCoursesForStudent(Long studentId) {
+
+    User student = userRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+    List<Course> enrolledCourses = student.getEnrolledCourses();
+
+
+    List<Course> availableCourses = courseRepository.findAll().stream()
+            .filter(course -> !enrolledCourses.contains(course))
             .collect(Collectors.toList());
-    }
+
+
+    return availableCourses.stream().map(course -> {
+        Map<String, Object> courseData = new HashMap<>();
+        courseData.put("id", course.getId());
+        courseData.put("title", course.getTitle());
+        courseData.put("description", course.getDescription());
+        courseData.put("duration", course.getDuration());
+        return courseData;
+    }).collect(Collectors.toList());
+}
 
     public Course enrollInCourse(Long courseId, String username) {
         User user = userRepository.findByUsername(username)
@@ -180,18 +174,15 @@ public List<CourseDTO> getCoursesByInstructor(Long instructorId) {
         return course;
     }
 
-public CourseEnrollmentDTO getEnrolledStudents(Long courseId) {
-    Course course = courseRepository.findById(courseId)
-        .orElseThrow(() -> new RuntimeException("Course not found"));
+
+    public List<String> getEnrolledStudentNames(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
 
-    List<String> enrolledStudentsNames = course.getEnrolledStudents()
-        .stream()
-        .map(User::getUsername)
-        .collect(Collectors.toList());
-
-
-    return new CourseEnrollmentDTO(course.getTitle(), enrolledStudentsNames);
-}
-
+        return course.getEnrolledStudents()
+                .stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList());
+    }
 }
