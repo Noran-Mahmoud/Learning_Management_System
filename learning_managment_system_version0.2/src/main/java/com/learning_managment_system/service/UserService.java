@@ -37,7 +37,7 @@ public class UserService implements UserDetailsService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String role = user.getRole().toUpperCase();
-        if(!role.equals("ADMIN") || !role.equals("INSTRUCTOR") || !role.equals("STUDENT")){
+        if(!(role.equals("ADMIN") || role.equals("INSTRUCTOR") || role.equals("STUDENT"))){
             return false;
         }
         user.setRole(role);
