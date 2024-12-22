@@ -67,7 +67,7 @@ public class UserController {
     // The account holder or admin only
     @PreAuthorize("hasRole('ADMIN') or principal.username == #username")
     @PatchMapping("/update/{username}")
-    public ResponseEntity<Map<String, Object>> updateUserProfile(@PathVariable String username, @Valid @RequestBody User updatedUser) {
+    public ResponseEntity<Map<String, Object>> updateUserProfile(@PathVariable String username, @RequestBody User updatedUser) {
             Map<String, Object> updatedUserData = userService.updateUserProfile(username, updatedUser);
             return ResponseEntity.ok(updatedUserData);
     }
