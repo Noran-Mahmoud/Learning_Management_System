@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,12 +97,15 @@ public class CourseController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/{courseTitle}/lessons")
-    public ResponseEntity<Course> createLesson(
+    public ResponseEntity<Map<String, Object>> createLesson(
             @PathVariable String courseTitle,
-            @Valid @RequestBody Lesson lesson
-    ) {
+            @Valid @RequestBody Lesson lesson){
         Course course = courseService.addLessonToCourse(courseTitle, lesson);
-        return ResponseEntity.status(HttpStatus.CREATED).body(course);
+        Set <Lesson> lessons = course.getLessons();
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Lesson successfully added to " + course.getTitle());
+        response.put("All lessons in course", lessons);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
