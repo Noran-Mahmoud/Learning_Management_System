@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -47,25 +46,25 @@ public class AttendanceServiceTest {
     void testGenerateOtpForLesson_Success() {
 
         Long lessonId = 1L;
-        Long studentId = 2L;
+        String studentName = "student";
 
         Lesson lesson = new Lesson();
         lesson.setId(lessonId);
 
         Course course = new Course();
         course.setId(1L);
-        course.setEnrolledStudents(Collections.singletonList(new User() {{ setId(studentId); }}));
+        course.setEnrolledStudents(Collections.singletonList(new User() {{ setUsername(studentName); }}));
 
         lesson.setCourse(course);
 
         User student = new User();
-        student.setId(studentId);
+        student.setUsername(studentName);
 
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
-        when(userRepository.findById(studentId)).thenReturn(Optional.of(student));
+        when(userRepository.findByUsername(studentName)).thenReturn(Optional.of(student));
 
 
-        String otp = attendanceService.generateOtpForLesson(lessonId, studentId);
+        String otp = attendanceService.generateOtpForLesson(lessonId, studentName);
 
 
         assertNotNull(otp);
@@ -76,7 +75,7 @@ public class AttendanceServiceTest {
     @Test
     void testGenerateOtpForLesson_StudentNotEnrolled() {
         Long lessonId = 1L;
-        Long studentId = 2L;
+        String studentName = "student";
 
 
         Lesson lesson = new Lesson();
@@ -89,11 +88,11 @@ public class AttendanceServiceTest {
 
 
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
-        when(userRepository.findById(studentId)).thenReturn(Optional.of(new User()));
+        when(userRepository.findByUsername(studentName)).thenReturn(Optional.of(new User()));
 
 
         assertThrows(IllegalArgumentException.class, () -> {
-            attendanceService.generateOtpForLesson(lessonId, studentId);
+            attendanceService.generateOtpForLesson(lessonId, studentName);
         });
 
 
@@ -104,6 +103,7 @@ public class AttendanceServiceTest {
     void testValidateOtp_Success() {
         Long lessonId = 1L;
         Long studentId = 2L;
+        String studentName = "student";
         String otp = "123456";
 
 
@@ -112,7 +112,7 @@ public class AttendanceServiceTest {
 
         Course course = new Course();
         course.setId(1L);
-        course.setEnrolledStudents(Collections.singletonList(new User() {{ setId(studentId); }}));
+        course.setEnrolledStudents(Collections.singletonList(new User() {{ setId(studentId); setUsername(studentName);}}));
 
         lesson.setCourse(course);
 
@@ -127,7 +127,7 @@ public class AttendanceServiceTest {
             .thenReturn(Optional.of(attendance));
 
 
-        boolean result = attendanceService.validateOtp(lessonId, studentId, otp);
+        boolean result = attendanceService.validateOtp(lessonId, studentName, studentId, otp);
 
 
         assertTrue(result);
@@ -138,6 +138,7 @@ public class AttendanceServiceTest {
     void testValidateOtp_InvalidOtp() {
         Long lessonId = 1L;
         Long studentId = 2L;
+        String studentName = "student";
         String otp = "123456";
 
 
@@ -146,7 +147,7 @@ public class AttendanceServiceTest {
 
         Course course = new Course();
         course.setId(1L);
-        course.setEnrolledStudents(Collections.singletonList(new User() {{ setId(studentId); }}));
+        course.setEnrolledStudents(Collections.singletonList(new User() {{ setId(studentId); setUsername(studentName);}}));
 
         lesson.setCourse(course);
 
@@ -155,7 +156,7 @@ public class AttendanceServiceTest {
         when(lessonAttendanceRepository.findByLessonIdAndStudentIdAndOtp(lessonId, studentId, otp))
             .thenReturn(Optional.empty());
 
-        boolean result = attendanceService.validateOtp(lessonId, studentId, otp);
+        boolean result = attendanceService.validateOtp(lessonId,studentName, studentId, otp);
 
 
         assertFalse(result);
