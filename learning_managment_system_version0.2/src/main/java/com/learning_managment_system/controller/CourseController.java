@@ -13,10 +13,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -29,7 +31,7 @@ public class CourseController {
         this.courseService = courseService;
         this.questionService = questionService;
     }
-
+    
     @GetMapping("/all")
     public Response getCourses() {
         List<Map<String, Object>> courses = courseService.getAllCourses();
@@ -110,20 +112,25 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
 
-
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    @PostMapping("/{courseTitle}/question-bank")
-    public ResponseEntity<Course> addToQuestionBank(@RequestBody List<@Valid Question> questions ,@PathVariable String courseTitle) {
+    @PostMapping("/{courseTitle}/question_bank")
+    public ResponseEntity<String> addToQuestionBank(@RequestBody List<@Valid Question> questions ,@PathVariable String courseTitle) {
         for(Question question: questions) {
-            if(question.getCorrectAnswer() == null)throw new RuntimeException("Correct answer is required");
-            if(question.getMarks() == null)throw new RuntimeException("Marks is required");
-            if(question.getType() == null)throw new RuntimeException("Question type is required");
-            if(question.getType().toString() == "MCQ" && question.getOptions().isEmpty())
-                throw new RuntimeException("Options are required for MCQ");
+            if(question.getCorrectAnswer() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Correct answer is required");
+            if(question.getMarks() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Marks is required");
+            if(question.getType() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Question type is required");
+            if(question.getType().toString() == "MCQ" && question.getOptions() == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Options are required for MCQ");
 
             questionService.createQuestion(question, courseTitle);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Question added successfully");
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @GetMapping("/get/{courseTitle}/question_bank")
+    public ResponseEntity<Set<Question>> getQuestionsOfCourse(@PathVariable String courseTitle){
+        return ResponseEntity.ok(questionService.getQuestionsOfCourse(courseTitle));
     }
 
 }
