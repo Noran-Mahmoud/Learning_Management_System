@@ -7,8 +7,12 @@ import com.learning_managment_system.repository.CourseRepository;
 import com.learning_managment_system.repository.LessonRepository;
 import com.learning_managment_system.repository.UserRepository;
 import jakarta.transaction.Transactional;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,13 +70,26 @@ public class CourseService {
         }
     }
 
-    public Lesson addLessonToCourse(String courseTitle, Lesson lesson) {
+    public Course addLessonToCourse(String courseTitle, Lesson lesson) {
         Course course = courseRepository.findByTitle(courseTitle)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
+        List<Lesson> foundLesson = lessonRepository.findAllByTitle(lesson.getTitle());
+
+        if(foundLesson.stream().anyMatch(l -> course.getLessons().contains(l))){
+            throw new RuntimeException("Lesson already exist in this course");
+        }
         lesson.setCourse(course);
         course.getLessons().add(lesson);
-        courseRepository.save(course);
-        return lessonRepository.save(lesson);
+        return courseRepository.save(course);
+    }
+
+    public Set<Lesson> getLessonsByCourse(String courseTitle){
+        Course course = courseRepository.findByTitle(courseTitle)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        if(course.getLessons() == null || course.getLessons().isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No lessons in course");
+        }
+        return course.getLessons();
     }
 
 
