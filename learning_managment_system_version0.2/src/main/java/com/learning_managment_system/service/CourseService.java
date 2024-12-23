@@ -22,22 +22,28 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public CourseService(CourseRepository courseRepository, LessonRepository lessonRepository, UserRepository userRepository) {
+    public CourseService(
+            CourseRepository courseRepository,
+            LessonRepository lessonRepository,
+            UserRepository userRepository,
+            NotificationService notificationService) {
         this.courseRepository = courseRepository;
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
-    public Course createCourse(String title, String description
-            , String duration, String instructorName, MultipartFile mediaFile) {
+    public Course createCourse(String title, String description, String duration, String instructorName,
+            MultipartFile mediaFile) {
 
-        if(courseRepository.findByTitle(title).isPresent()) {
+        if (courseRepository.findByTitle(title).isPresent()) {
             throw new RuntimeException("Course already exists");
         }
 
-        Optional <User> instructor = userRepository.findByUsername(instructorName);
-        if(!instructor.isPresent()) {
+        Optional<User> instructor = userRepository.findByUsername(instructorName);
+        if (!instructor.isPresent()) {
             throw new RuntimeException("Instructor not found");
         }
         String mediaFileUrl = null;
@@ -76,37 +82,58 @@ public class CourseService {
     }
 
 
+    @Transactional
     public Map<String, Object> updateCourse(String courseTitle, Course updatedCourse) {
-        Optional<Course> existingCourseOpt = courseRepository.findByTitle(courseTitle);
-
-        if (!existingCourseOpt.isPresent()) {
-            throw new RuntimeException("Course not found");
-        }
-        Course existingCourse = existingCourseOpt.get();
-
-        if (updatedCourse.getTitle() != null) {
-            courseRepository.findByTitle(updatedCourse.getTitle()).ifPresent(existingCourseWithTitle-> {
-                    throw new RuntimeException("Course with this title already exists");});
+        // Find the existing course by title
+        Course existingCourse = courseRepository.findByTitle(courseTitle)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+    
+        // Track changes for notification message
+        StringBuilder updateMessage = new StringBuilder("The course '" + existingCourse.getTitle() + "' has been updated: ");
+    
+        // Check if the title is being updated and ensure uniqueness
+        if (updatedCourse.getTitle() != null && !updatedCourse.getTitle().equals(existingCourse.getTitle())) {
+            courseRepository.findByTitle(updatedCourse.getTitle())
+                    .ifPresent(existingCourseWithTitle -> {
+                        throw new RuntimeException("Course with this title already exists");
+                    });
             existingCourse.setTitle(updatedCourse.getTitle());
+            updateMessage.append("Title updated to '" + updatedCourse.getTitle() + "'. ");
         }
-        if (updatedCourse.getDescription() != null) {
+    
+        // Update the description if provided
+        if (updatedCourse.getDescription() != null && !updatedCourse.getDescription().equals(existingCourse.getDescription())) {
             existingCourse.setDescription(updatedCourse.getDescription());
+            updateMessage.append("Description updated to  " + updatedCourse.getDescription() +"'. ");
         }
-        if (updatedCourse.getDuration() != null) {
+    
+        // Update the duration if provided
+        if (updatedCourse.getDuration() != null && !updatedCourse.getDuration().equals(existingCourse.getDuration())) {
             existingCourse.setDuration(updatedCourse.getDuration());
+            updateMessage.append("Duration updated to " + updatedCourse.getDuration() + ". ");
         }
-        if (updatedCourse.getMediaFileUrl() != null) {
+    
+        // Update the media file URL if provided
+        if (updatedCourse.getMediaFileUrl() != null && !updatedCourse.getMediaFileUrl().equals(existingCourse.getMediaFileUrl())) {
             existingCourse.setMediaFileUrl(updatedCourse.getMediaFileUrl());
+            updateMessage.append("Media file updated. ");
         }
-        if (updatedCourse.getInstructor() != null) {
+    
+        // Update the instructor if provided
+        if (updatedCourse.getInstructor() != null && !updatedCourse.getInstructor().equals(existingCourse.getInstructor()) ) {
             userRepository.findByUsername(updatedCourse.getInstructor().getUsername())
                     .orElseThrow(() -> new RuntimeException("New Instructor not found"));
             existingCourse.setInstructor(updatedCourse.getInstructor());
+            updateMessage.append("Instructor updated to  " + updatedCourse.getInstructor().getId() + "'. ");
         }
-
-
+    
+        // Save the updated course
         Course savedCourse = courseRepository.save(existingCourse);
-
+    
+        // Notify enrolled students about the course update
+        notifyStudentsAboutCourseUpdate(savedCourse, updateMessage.toString());
+    
+        // Prepare the response map
         Map<String, Object> courseData = new HashMap<>();
         courseData.put("id", savedCourse.getId());
         courseData.put("title", savedCourse.getTitle());
@@ -115,18 +142,25 @@ public class CourseService {
         courseData.put("mediaFileUrl", savedCourse.getMediaFileUrl());
         return courseData;
     }
+    
+    // Notify enrolled students about the course update
+    private void notifyStudentsAboutCourseUpdate(Course course, String updateMessage) {
+        for (User student : course.getEnrolledStudents()) {
+            notificationService.createCourseUpdateNotification(student.getId(), updateMessage);
+        }
+    }
+    
 
     public void deleteCourse(String courseTitle) {
         if (!courseRepository.findByTitle(courseTitle).isPresent()) {
             throw new RuntimeException("Course not found");
         }
         Course course = courseRepository.findByTitle(courseTitle).get();
-        if(course.getEnrolledStudents() != null){
+        if (course.getEnrolledStudents() != null) {
             throw new RuntimeException("Cannot delete course with enrolled students");
         }
         courseRepository.deleteById(course.getId());
     }
-
 
     @Transactional
     public List<Map<String, Object>> getAvailableCoursesForUser(String studentName) {
@@ -150,7 +184,7 @@ public class CourseService {
     @Transactional
     public List<Map<String, Object>> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
-        if(courses.isEmpty()){
+        if (courses.isEmpty()) {
             return new ArrayList<Map<String, Object>>();
         }
         return courses.stream().map(course -> {
@@ -167,14 +201,17 @@ public class CourseService {
     @Transactional
     public Course enrollInCourse(String courseTitle, String username) {
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         Course course = courseRepository.findByTitle(courseTitle)
-            .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
         if (!user.getEnrolledCourses().contains(course)) {
             user.getEnrolledCourses().add(course);
             course.getEnrolledStudents().add(user);
             userRepository.save(user);
+
+            // Add enrollment notification
+            notificationService.createEnrollmentNotification(user.getId(), courseTitle);
         } else {
             throw new RuntimeException("You are already enrolled in this course");
         }

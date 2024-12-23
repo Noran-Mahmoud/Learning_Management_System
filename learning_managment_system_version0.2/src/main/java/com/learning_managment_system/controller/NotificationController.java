@@ -90,7 +90,7 @@ public class NotificationController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping
+    @GetMapping("/show")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getStudentNotifications(
             Authentication authentication,

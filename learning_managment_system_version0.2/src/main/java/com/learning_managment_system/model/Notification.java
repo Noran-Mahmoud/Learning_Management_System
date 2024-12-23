@@ -27,6 +27,18 @@ public class Notification {
     @Column(length = 50, nullable = false)
     private NotificationType type;
 
+    // @ManyToOne
+    // @JoinColumn(name = "user_id")
+    // private User recipient;
+
+    // public User getRecipient() {
+    //     return recipient;
+    // }
+
+    // public void setRecipient(User recipient) {
+    //     this.recipient = recipient;
+    // }
+
     // Getters and Setters
     public Long getId() {
         return id;
