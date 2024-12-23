@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +28,6 @@ public class LessonController {
         String otp = attendanceService.generateOtpForLesson(lessonId, studentName);
         return ResponseEntity.ok(otp);
     }
-
 
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/{lessonId}/validate-otp")
@@ -54,13 +54,9 @@ public class LessonController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/attendance/{lessonId}")
-    public ResponseEntity<Integer> getAttendanceCount(@PathVariable Long lessonId) {
-        try {
-            int count = attendanceService.getAttendanceCountForLesson(lessonId);
-            return ResponseEntity.ok(count);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(0);
-        }
+    public ResponseEntity<List<String>> getAttendanceCount(@PathVariable Long lessonId) {
+        List<String> students = attendanceService.getAttendancesForLesson(lessonId);
+        return ResponseEntity.ok(students);
     }
 
 }
