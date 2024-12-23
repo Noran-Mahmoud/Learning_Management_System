@@ -262,8 +262,10 @@ public class AssessmentService {
 
         List <Question> answers = answeredQuiz.getQuestions();
         //generate and return feedback
-        List <Question> questions = ((Quiz) quiz).getQuestions().stream()
-            .sorted(Comparator.comparingInt(Question::getQuestionOrder))
+        List <Question> questions = ((Quiz) quiz).getQuestions();
+        questions.stream().forEach(q -> {if(q.getQuestionOrder() == null) 
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A question does not have question order!");});
+        questions.stream().sorted(Comparator.comparingInt(Question::getQuestionOrder))
             .collect(Collectors.toList());
 
         String feedBack = "";
