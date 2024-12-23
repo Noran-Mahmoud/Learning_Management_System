@@ -3,7 +3,6 @@ package com.learning_managment_system.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,12 +10,14 @@ import lombok.Setter;
 @Getter@Setter
 public class Submission {
     public Submission(){}
-    public Submission(User student, Assessment assessment) {
+    public Submission(User student, String studentName, Assessment assessment) {
         this.student = student;
+        this.studentName = studentName;
         this.assessment = assessment;
     }
-    public Submission(User student, Assessment assessment, String submissionFileUrl) {
+    public Submission(User student, String studentName, Assessment assessment, String submissionFileUrl) {
         this.student = student;
+        this.studentName = studentName;
         this.assessment = assessment;
         this.submissionFileUrl = submissionFileUrl;
     }
@@ -38,8 +39,4 @@ public class Submission {
     @ManyToOne @JoinColumn(name = "assessment_id" , nullable = false)
     @JsonBackReference("assessment-submission")
     private Assessment assessment;
-
-    @NotNull
-    private String assessmentTitle;
-
 }
