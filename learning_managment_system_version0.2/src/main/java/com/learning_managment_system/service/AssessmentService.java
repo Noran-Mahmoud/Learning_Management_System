@@ -1,6 +1,6 @@
 package com.learning_managment_system.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -145,12 +145,12 @@ public class AssessmentService {
     public String getAssignmentFeedback(String assignmentTitle, String studentName) {
         Assessment assignment = assessmentRepository.findByTitle(assignmentTitle)
                 .orElseThrow(() -> new RuntimeException("Assessment not found"));
-        if (assignment.getSubmissions().stream()
-                .noneMatch(submission -> submission.getStudent().getUsername().equals(studentName))) {
+
+        if(assignment.getSubmissions().stream().noneMatch(submission -> submission.getStudentName().equals(studentName))) {
             throw new RuntimeException("Student did not submit the assignment");
         }
         String feedback = assignment.getSubmissions().stream().filter(
-                submission -> submission.getStudent().getUsername().equals(studentName))
+                submission -> submission.getStudentName().equals(studentName))
                 .findFirst().get().getFeedBack();
 
         if (feedback == null)
@@ -160,10 +160,12 @@ public class AssessmentService {
     }
 
     public void deleteAssessment(String assessmentTitle) {
-        Assessment assessment = assessmentRepository.findByTitle(assessmentTitle).get();
+        Assessment assessment = assessmentRepository.findByTitle(assessmentTitle)
+            .orElseThrow(() -> new RuntimeException("Assessment does not exist"));
         Course course = assessment.getCourse();
         course.getAssessments().remove(assessment);
         courseRepository.save(course);
+        assessmentRepository.delete(assessment);
     }
 
     public boolean gradeAssessment(String assessmentTitle, Submission submission) {
@@ -231,9 +233,9 @@ public class AssessmentService {
 
     public void submitAssignment(String assignmentTitle, String studentName, MultipartFile submissionFile) {
         Assessment assignment = assessmentRepository.findByTitle(assignmentTitle)
-                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment not found"));
         courseRepository.findByTitle(assignment.getCourseTitle())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course not found"));
 
         User student = userRepository.findByUsername(studentName).get();
         if (submitRepository.findByStudentIdAndAssessmentTitle(
@@ -246,8 +248,9 @@ public class AssessmentService {
             submissionUrl = courseService.uploadMediaFile(submissionFile);
         }
 
-        Submission submission = submitRepository
-                .save(new Submission(student, student.getUsername(), assignment, submissionUrl));
+        Submission submission = submitRepository.save(new Submission(student, student.getUsername() ,assignment, submissionUrl));
+        if(assignment.getSubmissions() == null ||assignment.getSubmissions().isEmpty())
+            assignment.setSubmissions(new ArrayList<>());
         assignment.getSubmissions().add(submission);
         assessmentRepository.save(assignment);
     }
@@ -257,10 +260,12 @@ public class AssessmentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Quiz " + answeredQuiz.getTitle() + " not found"));
 
-        List<Question> answers = answeredQuiz.getQuestions();
-        // generate and return feedback
-        List<Question> questions = ((Quiz) quiz).getQuestions();
-        Collections.sort(questions, Comparator.comparingInt(q -> q.getQuestionOrder()));
+        List <Question> answers = answeredQuiz.getQuestions();
+        //generate and return feedback
+        List <Question> questions = ((Quiz) quiz).getQuestions().stream()
+            .sorted(Comparator.comparingInt(Question::getQuestionOrder))
+            .collect(Collectors.toList());
+
         String feedBack = "";
         for (Question question : questions) {
                 if (question.getQuestionOrder() == null) {
@@ -284,8 +289,9 @@ public class AssessmentService {
             }
         }
 
-        Submission submission = submitRepository
-                .save(new Submission(userRepository.findByUsername(studentName).get(), studentName, quiz));
+        Submission submission = submitRepository.save(new Submission(userRepository.findByUsername(studentName).get(), studentName, quiz));
+        if(quiz.getSubmissions() == null ||quiz.getSubmissions().isEmpty())
+            quiz.setSubmissions(new ArrayList<>());
         quiz.getSubmissions().add(submission);
         assessmentRepository.save(quiz);
 
