@@ -81,12 +81,26 @@ public class UserServiceTest {
     }
 
     @Test
-    void testLoginUser_Failure_InvalidCredentials() {
-        when(userRepository.findByUsername("yasmeen")).thenReturn(Optional.empty());
+    void testLoginUser_Failure_InvalidPassword() {
+        User user = new User();
+        user.setUsername("yasmeen");
+        user.setPassword("encodedPassword");
 
-        String result = userService.loginUser("yasmeen", "1810");
+        when(userRepository.findByUsername("yasmeen")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
-        assertEquals("Invalid username or password\n", result);
+        String result = userService.loginUser("yasmeen", "wrongPassword");
+
+        assertEquals("Invalid Password\n", result);
+    }
+
+    @Test
+    void testLoginUser_Failure_InvalidUsername() {
+        when(userRepository.findByUsername("invalidUser")).thenReturn(Optional.empty());
+
+        String result = userService.loginUser("invalidUser", "1810");
+
+        assertEquals("Invalid Username", result);
     }
 
     @Test
