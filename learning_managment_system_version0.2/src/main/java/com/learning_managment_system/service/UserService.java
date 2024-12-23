@@ -36,11 +36,6 @@ public class UserService implements UserDetailsService {
             return false;
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        String role = user.getRole().toUpperCase();
-        if(!(role.equals("ADMIN") || role.equals("INSTRUCTOR") || role.equals("STUDENT"))){
-            return false;
-        }
-        user.setRole(role);
         userRepository.save(user);
         return true;
     }
@@ -50,10 +45,7 @@ public class UserService implements UserDetailsService {
         if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
             return "Login successful\n";
         }
-        else if(user.isPresent()){
-            return "Invalid Password\n";
-        }
-        return "Invalid Username";
+        return "Invalid username or password\n";
     }
 
     public User getUserByUsername(String username) {
