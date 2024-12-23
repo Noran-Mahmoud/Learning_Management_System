@@ -36,12 +36,11 @@ public class Assessment {
     @NotNull
     private String courseTitle;
     
-    @NotNull
     private Double fullMark;
     private String deadLine;
     private String description;
 
-    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference("assessment-submission")
     private List<Submission> submissions;
 }
