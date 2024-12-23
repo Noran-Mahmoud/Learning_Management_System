@@ -6,21 +6,17 @@ import com.learning_managment_system.model.User;
 import com.learning_managment_system.repository.CourseRepository;
 import com.learning_managment_system.repository.LessonRepository;
 import com.learning_managment_system.repository.UserRepository;
-
 import jakarta.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Transactional
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
@@ -79,6 +75,7 @@ public class CourseService {
         return lessonRepository.save(lesson);
     }
 
+
     public Map<String, Object> updateCourse(String courseTitle, Course updatedCourse) {
         Optional<Course> existingCourseOpt = courseRepository.findByTitle(courseTitle);
 
@@ -130,35 +127,6 @@ public class CourseService {
         courseRepository.deleteById(course.getId());
     }
 
-    public String generateOtpForLesson(Long lessonId) {
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Lesson not found"));
-
-
-        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
-
-
-        lesson.setOtp(otp);
-        lesson.setOtpGeneratedAt(LocalDateTime.now());
-
-
-        lessonRepository.save(lesson);
-
-        return otp;
-    }
-
-    public boolean verifyOtp(Long lessonId, String otp) {
-
-        Optional<Lesson> optionalLesson = lessonRepository.findById(lessonId);
-        if (optionalLesson.isEmpty()) {
-            throw new RuntimeException("Lesson not found");
-        }
-
-        Lesson lesson = optionalLesson.get();
-
-        return lesson.getOtp() != null && lesson.getOtp().equals(otp);
-    }
 
     @Transactional
     public List<Map<String, Object>> getAvailableCoursesForUser(String studentName) {

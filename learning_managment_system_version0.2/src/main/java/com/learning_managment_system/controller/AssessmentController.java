@@ -3,11 +3,14 @@ package com.learning_managment_system.controller;
 import java.util.List;
 
 import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.learning_managment_system.model.Assessment;
 import com.learning_managment_system.model.Assignment;
@@ -35,18 +38,20 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentService.getAssessmentsByUser(authentication.getName()));
     }
 
-    @GetMapping("{courseTitle}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('STUDENT')")
+    @GetMapping("/course/{courseTitle}")
     public ResponseEntity<List<Assessment>> getAssessmentsByCourse(@PathVariable String courseTitle){
         return ResponseEntity.ok(assessmentService.getAssessmentsByCourse(courseTitle));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('STUDENT')")
     @GetMapping("/{assessmentTitle}")
     public ResponseEntity<Assessment> getAssessment(@PathVariable String assessmentTitle){
         return ResponseEntity.ok(assessmentService.getAssessment(assessmentTitle));
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR') or principal.username == #username")
-    @GetMapping("/grades/{username}")
+    @GetMapping("/grades/user/{username}")
     public List<Submission> getGradesByUser(@PathVariable String username ,Authentication authentication) {
         return assessmentService.getGradesByStudent(username);
     }
@@ -57,10 +62,10 @@ public class AssessmentController {
         return assessmentService.getGradesByAssessment(assessmentTitle);
     }
 
-    @PreAuthorize("hasRole('STUDENT') or hasRole('INSTRUCTOR')")
-    @GetMapping("/{assignmentTitle}/get_feedback")
-    public ResponseEntity<String> getAssignmentFeedback(@PathVariable String assignmentTitle, Authentication authentication) {
-        String username =  authentication.getName();
+    @PreAuthorize("hasRole('INSTRUCTOR') or principal.username == #username")
+    @GetMapping(value = "/get_feedback", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> getAssignmentFeedback(@RequestParam String assignmentTitle
+                , @RequestParam String username) {
         return ResponseEntity.ok(assessmentService.getAssignmentFeedback(assignmentTitle, username));
     }
     
@@ -69,18 +74,24 @@ public class AssessmentController {
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/assignment")
     public ResponseEntity<Assignment> createAssignment(@Valid @RequestBody Assignment assignment) {
+        if(assignment.getFullMark() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"FullMark is required!");
+        }
         return ResponseEntity.ok(assessmentService.createAssignment(assignment));
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/quiz")
     public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody Quiz quiz) throws BadRequestException {
-        // if(quiz.getType() != null){
-        //     throw new BadRequestException("Questions Type required!");
-        // }
-        // if(quiz.getNQuestions() != null){
-        //     throw new BadRequestException("Number of Questions required!");
-        // }
+        if(quiz.getType() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Questions Type required!");
+        }
+        if(quiz.getNQuestions() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Number of Questions required!");
+        }
+        if(quiz.getFullMark() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"FullMark is required!");
+        }
         return ResponseEntity.ok(assessmentService
                 .createQuiz(quiz, quiz.getType().toString(), quiz.getNQuestions()));
     }
@@ -93,9 +104,13 @@ public class AssessmentController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PatchMapping("/{assessmentTitle}/mark")
-    public ResponseEntity<String> gradeAssessment(@PathVariable String assessmentTitle,@Valid @RequestBody Submission submission) throws BadRequestException {// grade, feedback
+    public ResponseEntity<String> gradeAssessment(@PathVariable String assessmentTitle
+            , @RequestBody Submission submission) throws BadRequestException {// grade, feedback, studentName
         if(submission.getGrade() == null){
             throw new BadRequestException("Grade is required");
+        }
+        if(submission.getStudentName() == null){
+            throw new BadRequestException("Student Name is required");
         }
         if(assessmentService.gradeAssessment(assessmentTitle, submission)){
             return ResponseEntity.ok("Assessment marked successfully");
@@ -123,7 +138,7 @@ public class AssessmentController {
     @PostMapping("/submit_quiz")
     public ResponseEntity<String> submitQuiz(@Valid @RequestBody Quiz quiz, Authentication authentication) {
         String studentUsername =  authentication.getName();
-        if(quiz.getQuestions() == null) return ResponseEntity.badRequest().body("No answers submitted");
+        if(quiz.getQuestions() == null) throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No Answers submitted!");
         return ResponseEntity.ok("Quiz submitted successfully\nFeedback: " + assessmentService.submitQuiz(quiz, studentUsername));
     }
     

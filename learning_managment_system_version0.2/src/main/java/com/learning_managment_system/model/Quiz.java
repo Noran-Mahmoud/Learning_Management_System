@@ -4,7 +4,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -14,19 +13,20 @@ import lombok.*;
 
 public class Quiz extends Assessment{
     public Quiz(){}
-    public Quiz(String title, Double fullMark, String courseTitle, int nQuestions, Question.Type type) {
+    public Quiz(String title, Double fullMark, String courseTitle, Integer nQuestions, Question.Type type) {
         super(title, fullMark, courseTitle);
         this.nQuestions = nQuestions;
         this.type = type;
     }
 
-    @NotNull
     @Column(nullable = false, columnDefinition = "integer default 1")
-    private int nQuestions;
-    @NotNull @Column(nullable = false, columnDefinition = "varchar(50) default 'T_F'")
+    private Integer nQuestions;
+
+    @Column(nullable = false, columnDefinition = "VARCHAR(50) default 'T_F'")
+    @Enumerated(EnumType.STRING)
     private Question.Type type;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference("quiz-question")
     private List<Question> questions;
 }

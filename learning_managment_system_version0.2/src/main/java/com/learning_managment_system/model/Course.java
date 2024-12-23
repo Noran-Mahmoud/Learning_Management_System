@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 @Getter@Setter @AllArgsConstructor
@@ -27,19 +29,19 @@ public class Course {
     private User instructor;
 
     @ManyToMany(mappedBy = "enrolledCourses")
-    private List<User> enrolledStudents;
+    private List<User> enrolledStudents= new ArrayList<User>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Lesson> lessons; 
+    private Set<Lesson> lessons;
     
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Assessment> assessments; 
+    private Set<Assessment> assessments;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference("course-question")
-    private Set<Question> questionBank; 
+    private Set<Question> questionBank;
 
     public Course(Long id, String title, String description, String duration, String mediaFileUrl) {
         this.id = id;

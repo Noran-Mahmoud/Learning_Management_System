@@ -35,6 +35,8 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             return false;
         }
+        if(user.getRole() == null) return false;
+        
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String role = user.getRole().toUpperCase();
         if(!(role.equals("ADMIN") || role.equals("INSTRUCTOR") || role.equals("STUDENT"))){
@@ -53,7 +55,7 @@ public class UserService implements UserDetailsService {
         else if(user.isPresent()){
             return "Invalid Password\n";
         }
-        return "Invalid Username";
+        return "Invalid Username\n";
     }
 
     public User getUserByUsername(String username) {

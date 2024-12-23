@@ -26,6 +26,9 @@ public class UserController {
 
     @PostMapping("/admin/register")
     public ResponseEntity<User> registerAdmin(@Valid @RequestBody User user) throws BadRequestException {
+        if(!user.getRole().equals("ADMIN")){
+            throw new BadRequestException("User must be ADMIN");
+        }
         if(!userService.registerUser(user)){
             throw new BadRequestException("User already exists");
         }

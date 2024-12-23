@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.*;
 import com.learning_managment_system.model.Course;
 import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.model.Question;
-import com.learning_managment_system.model.Response;
 import com.learning_managment_system.service.CourseService;
 import com.learning_managment_system.service.QuestionService;
 
@@ -13,10 +12,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -31,18 +32,11 @@ public class CourseController {
     }
     
     @GetMapping("/all")
-    public Response getCourses() {
+    public ResponseEntity<List<Map<String, Object>>> getCourses() {
         List<Map<String, Object>> courses = courseService.getAllCourses();
-        Response response = new Response();
-        if(courses.isEmpty()) {
-            response.setStatus(false);
-            response.setMessage("No courses found");
-        } else {
-            response.setStatus(true);
-            response.setData(courses);
-            response.setMessage(courses.size() + " courses in the system");
-        }
-        return response;
+        if(courses.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT ,"No courses found");
+        return ResponseEntity.ok(courses);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
@@ -75,7 +69,7 @@ public class CourseController {
     }
 
     @GetMapping("/{courseTitle}/students")
-    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     public ResponseEntity<List<String>> getEnrolledStudents(@PathVariable String courseTitle) {
         List<String> studentNames = courseService.getEnrolledStudentNames(courseTitle);
         return ResponseEntity.ok(studentNames);
@@ -111,18 +105,24 @@ public class CourseController {
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    @PostMapping("/{courseTitle}/question-bank")
-    public ResponseEntity<Course> addToQuestionBank(@RequestBody List<@Valid Question> questions ,@PathVariable String courseTitle) {
+    @PostMapping("/{courseTitle}/question_bank")
+    public ResponseEntity<String> addToQuestionBank(@RequestBody List<@Valid Question> questions ,@PathVariable String courseTitle) {
         for(Question question: questions) {
-            if(question.getCorrectAnswer() == null)throw new RuntimeException("Correct answer is required");
-            if(question.getMarks() == null)throw new RuntimeException("Marks is required");
-            if(question.getType() == null)throw new RuntimeException("Question type is required");
-            if(question.getType().toString() == "MCQ" && question.getOptions().isEmpty())
-                throw new RuntimeException("Options are required for MCQ");
+            if(question.getCorrectAnswer() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Correct answer is required");
+            if(question.getMarks() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Marks is required");
+            if(question.getType() == null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Question type is required");
+            if(question.getType().toString() == "MCQ" && question.getOptions() == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,"Options are required for MCQ");
 
             questionService.createQuestion(question, courseTitle);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Question added successfully");
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @GetMapping("/get/{courseTitle}/question_bank")
+    public ResponseEntity<Set<Question>> getQuestionsOfCourse(@PathVariable String courseTitle){
+        return ResponseEntity.ok(questionService.getQuestionsOfCourse(courseTitle));
     }
 
 }
