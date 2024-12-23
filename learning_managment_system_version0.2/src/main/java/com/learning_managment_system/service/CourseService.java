@@ -88,7 +88,7 @@ public class CourseService {
         Course existingCourse = existingCourseOpt.get();
 
         if (updatedCourse.getTitle() != null) {
-            courseRepository.findByTitle(updatedCourse.getTitle()).ifPresent(_-> {
+            courseRepository.findByTitle(updatedCourse.getTitle()).ifPresent(existingCourseWithTitle-> {
                     throw new RuntimeException("Course with this title already exists");});
             existingCourse.setTitle(updatedCourse.getTitle());
         }

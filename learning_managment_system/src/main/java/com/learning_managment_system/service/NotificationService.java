@@ -7,34 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// @Service
-// public class NotificationService {
-
-//     @Autowired
-//     private NotificationRepository notificationRepository;
-
-//     public List<Notification> getNotifications(Long userId, Boolean onlyUnread) {
-//         return onlyUnread
-//                 ? notificationRepository.findByUserIdAndIsRead(userId, false)
-//                 : notificationRepository.findByUserId(userId);
-//     }
-
-//     public Notification createNotification(Long userId, String content, String type) {
-//         Notification notification = new Notification();
-//         notification.setUserId(userId);
-//         notification.setContent(content);
-//         notification.setType(type);
-//         return notificationRepository.save(notification);
-//     }
-
-//     public void markAsRead(Long notificationId) {
-//         Notification notification = notificationRepository.findById(notificationId)
-//                 .orElseThrow(() -> new RuntimeException("Notification not found"));
-//         notification.setIsRead(true);
-//         notificationRepository.save(notification);
-//     }
-// }
-
 @Service
 public class NotificationService {
 

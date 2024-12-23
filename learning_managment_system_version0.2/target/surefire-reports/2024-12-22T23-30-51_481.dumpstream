@@ -1,0 +1,5 @@
+# Created at 2024-12-22T23:30:52.052
+Boot Manifest-JAR contains absolute paths in classpath 'D:\FCAI\third year\first semester\AD Soft\softProject\Learning_Management_System\learning_managment_system_version0.2\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
