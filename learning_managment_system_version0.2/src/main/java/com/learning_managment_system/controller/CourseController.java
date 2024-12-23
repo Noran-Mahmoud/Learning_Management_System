@@ -29,7 +29,7 @@ public class CourseController {
         this.courseService = courseService;
         this.questionService = questionService;
     }
-    
+
     @GetMapping("/all")
     public Response getCourses() {
         List<Map<String, Object>> courses = courseService.getAllCourses();
@@ -75,7 +75,7 @@ public class CourseController {
     }
 
     @GetMapping("/{courseTitle}/students")
-    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     public ResponseEntity<List<String>> getEnrolledStudents(@PathVariable String courseTitle) {
         List<String> studentNames = courseService.getEnrolledStudentNames(courseTitle);
         return ResponseEntity.ok(studentNames);
@@ -109,6 +109,7 @@ public class CourseController {
         Lesson createdLesson = courseService.addLessonToCourse(courseTitle, lesson);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
+
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/{courseTitle}/question-bank")
