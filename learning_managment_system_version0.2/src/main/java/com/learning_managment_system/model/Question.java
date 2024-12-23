@@ -25,6 +25,7 @@ public class Question {
 
     private String text;
     private String correctAnswer;
+    private String courseTitle;
     @NotNull
     private Double marks;
     
@@ -38,15 +39,14 @@ public class Question {
     @NotNull
     private Type type;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "question_id"))
     private Set<String> options;
 
     private Integer questionOrder;
 
-    @ManyToOne @JoinColumn(name = "course_id", nullable = false)
+    @ManyToOne @JoinColumn(name = "course_id")
     @JsonBackReference("course-question")
-    @NotNull
     private Course course;
 
     @ManyToOne @JoinColumn(name = "quiz_id")
