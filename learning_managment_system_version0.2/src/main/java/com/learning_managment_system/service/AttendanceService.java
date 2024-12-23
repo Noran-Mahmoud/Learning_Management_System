@@ -9,11 +9,15 @@ import com.learning_managment_system.repository.LessonRepository;
 import com.learning_managment_system.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -95,11 +99,19 @@ public class AttendanceService {
         return String.valueOf(otp);
     }
 
-    public int getAttendanceCountForLesson(Long lessonId) {
-     
-        Lesson lesson = lessonRepository.findById(lessonId)
+    public List<String> getAttendancesForLesson(Long lessonId) {
+        lessonRepository.findById(lessonId)
             .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
         
-        return lessonAttendanceRepository.countByLessonIdAndValidatedTrue(lessonId);
+        List <LessonAttendance> attendances =  lessonAttendanceRepository.findByLessonIdAndValidatedTrue(lessonId);
+        if(attendances.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No students attended");
+        }
+        List <Optional<User>> students = attendances.stream()
+            .map(a -> userRepository.findById(a.getStudentId())).collect(Collectors.toList());
+        List <String> names = students.stream().filter(s -> s.isPresent())
+            .map(s -> s.get().getUsername()).collect(Collectors.toList());
+
+        return names;
     }
 }
