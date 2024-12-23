@@ -3,7 +3,7 @@ package com.learning_managment_system.service;
 
 import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.model.LessonAttendance;
-import com.learning_managment_system.repository.CourseRepository;
+import com.learning_managment_system.model.User;
 import com.learning_managment_system.repository.LessonAttendanceRepository;
 import com.learning_managment_system.repository.LessonRepository;
 import com.learning_managment_system.repository.UserRepository;
@@ -24,63 +24,56 @@ public class AttendanceService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
     private LessonAttendanceRepository lessonAttendanceRepository;
 
-
-
-public String generateOtpForLesson(Long lessonId, Long studentId) {
-
-    Lesson lesson = lessonRepository.findById(lessonId)
-        .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
-
-
-    userRepository.findById(studentId)
-        .orElseThrow(() -> new IllegalArgumentException("Student not found"));
-
-
-    boolean isStudentEnrolled = lesson.getCourse()
-        .getEnrolledStudents()
-        .stream()
-        .anyMatch(student -> student.getId().equals(studentId));
-
-    if (!isStudentEnrolled) {
-        throw new IllegalArgumentException("Student is not enrolled in this course");
-    }
-
-
-    String otp = generateOtp();
-
-
-    LessonAttendance attendance = new LessonAttendance();
-    attendance.setLesson(lesson);
-    attendance.setOtp(otp);
-    attendance.setGeneratedAt(LocalDateTime.now());
-    attendance.setValidated(false);
-    attendance.setStudentId(studentId);
-
-
-    lessonAttendanceRepository.save(attendance);
-
-    return otp;
-}
-
-  public boolean validateOtp(Long lessonId, Long studentId, String otp) {
+    public String generateOtpForLesson(Long lessonId, String studentName) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
             .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
 
 
+        User student = userRepository.findByUsername(studentName)
+            .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+
         boolean isStudentEnrolled = lesson.getCourse()
             .getEnrolledStudents()
             .stream()
-            .anyMatch(student -> student.getId().equals(studentId));
+            .anyMatch(s -> s.getUsername().equals(studentName));
 
         if (!isStudentEnrolled) {
             throw new IllegalArgumentException("Student is not enrolled in this course");
         }
 
+
+        String otp = generateOtp();
+
+
+        LessonAttendance attendance = new LessonAttendance();
+        attendance.setLesson(lesson);
+        attendance.setOtp(otp);
+        attendance.setGeneratedAt(LocalDateTime.now());
+        attendance.setValidated(false);
+        attendance.setStudentId(student.getId());
+
+
+        lessonAttendanceRepository.save(attendance);
+
+        return otp;
+    }
+
+    public boolean validateOtp(Long lessonId, String studentName,Long studentId, String otp) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+            .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
+
+        boolean isStudentEnrolled = lesson.getCourse()
+            .getEnrolledStudents()
+            .stream()
+            .anyMatch(student -> student.getUsername().equals(studentName));
+
+        if (!isStudentEnrolled) {
+            throw new IllegalArgumentException("Student is not enrolled in this course");
+        }
 
         Optional<LessonAttendance> attendance = lessonAttendanceRepository
             .findByLessonIdAndStudentIdAndOtp(lessonId, studentId, otp);
@@ -96,10 +89,17 @@ public String generateOtpForLesson(Long lessonId, Long studentId) {
         return false;
     }
 
-
     private String generateOtp() {
         SecureRandom random = new SecureRandom();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
+    }
+
+    public int getAttendanceCountForLesson(Long lessonId) {
+     
+        Lesson lesson = lessonRepository.findById(lessonId)
+            .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
+        
+        return lessonAttendanceRepository.countByLessonIdAndValidatedTrue(lessonId);
     }
 }

@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface LessonAttendanceRepository extends JpaRepository<LessonAttendance, Long> {
 
     Optional<LessonAttendance> findByLessonIdAndStudentIdAndOtp(Long lessonId, Long studentId, String otp);
+    int countByLessonIdAndValidatedTrue(Long lessonId);
 
 }

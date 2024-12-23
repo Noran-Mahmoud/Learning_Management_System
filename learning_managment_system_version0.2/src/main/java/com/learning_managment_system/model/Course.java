@@ -28,14 +28,14 @@ public class Course {
     @NotNull
     private User instructor;
 
-    @ManyToMany(mappedBy = "enrolledCourses")
+    @ManyToMany(mappedBy = "enrolledCourses", fetch = FetchType.EAGER)
     private List<User> enrolledStudents= new ArrayList<User>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Lesson> lessons;
     
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Assessment> assessments;
 

@@ -23,35 +23,44 @@ public class LessonController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/{lessonId}/generate-otp")
-    public ResponseEntity<String> generateOtp(@PathVariable Long lessonId, @RequestParam Long studentId) {
-        String otp = attendanceService.generateOtpForLesson(lessonId, studentId);
+    public ResponseEntity<String> generateOtp(@PathVariable Long lessonId, @RequestParam String studentName) {
+        String otp = attendanceService.generateOtpForLesson(lessonId, studentName);
         return ResponseEntity.ok(otp);
     }
 
 
-@PreAuthorize("hasRole('STUDENT')")
-@PostMapping("/{lessonId}/validate-otp")
-public ResponseEntity<Boolean> validateOtp(
-    @PathVariable Long lessonId,
-    @RequestParam Long studentId,
-    @RequestParam String otp,
-    Authentication authentication) {
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/{lessonId}/validate-otp")
+    public ResponseEntity<Boolean> validateOtp(
+        @PathVariable Long lessonId,
+        @RequestParam String OTP,
+        Authentication authentication) {
 
-    String username = authentication.getName();
-    Optional<User> userOpt = userRepository.findById(studentId);
-    if (userOpt.isPresent()) {
-        User user = userOpt.get();
+        String username = authentication.getName();
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
 
-        if (!username.equals(user.getUsername())) {
-            throw new AccessDeniedException("You do not have permission to validate OTP for this student.");
+            if (!username.equals(user.getUsername())) {
+                throw new AccessDeniedException("You do not have permission to validate OTP for this student.");
+            }
+
+            boolean isValid = attendanceService.validateOtp(lessonId, username, userOpt.get().getId(), OTP);
+            return ResponseEntity.ok(isValid);
+        } else {
+            throw new RuntimeException("Student not found");
         }
-
-        boolean isValid = attendanceService.validateOtp(lessonId, studentId, otp);
-        return ResponseEntity.ok(isValid);
-    } else {
-        throw new RuntimeException("Student not found");
     }
-}
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @GetMapping("/attendance/{lessonId}")
+    public ResponseEntity<Integer> getAttendanceCount(@PathVariable Long lessonId) {
+        try {
+            int count = attendanceService.getAttendanceCountForLesson(lessonId);
+            return ResponseEntity.ok(count);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(0);
+        }
+    }
 
 }
