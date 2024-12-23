@@ -96,12 +96,18 @@ public class CourseController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping("/{courseTitle}/lessons")
-    public ResponseEntity<Lesson> createLesson(
+    public ResponseEntity<Course> createLesson(
             @PathVariable String courseTitle,
             @Valid @RequestBody Lesson lesson
     ) {
-        Lesson createdLesson = courseService.addLessonToCourse(courseTitle, lesson);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
+        Course course = courseService.addLessonToCourse(courseTitle, lesson);
+        return ResponseEntity.status(HttpStatus.CREATED).body(course);
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @GetMapping("/{courseTitle}/lessons")
+    public ResponseEntity<Set<Lesson>> getLessonsByCourse(@PathVariable String courseTitle){
+        return ResponseEntity.ok(courseService.getLessonsByCourse(courseTitle));
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
