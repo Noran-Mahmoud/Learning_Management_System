@@ -41,6 +41,7 @@ public class UserServiceTest {
         User user = new User();
         user.setUsername("yasmeen");
         user.setPassword("1810");
+        user.setRole("STUDENT");
 
         when(userRepository.findByUsername("yasmeen")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("1810")).thenReturn("encodedPassword");
