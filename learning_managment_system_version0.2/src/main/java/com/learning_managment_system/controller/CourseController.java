@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.*;
 import com.learning_managment_system.model.Course;
 import com.learning_managment_system.model.Lesson;
 import com.learning_managment_system.model.Question;
-import com.learning_managment_system.model.Response;
 import com.learning_managment_system.service.CourseService;
 import com.learning_managment_system.service.QuestionService;
 
@@ -33,18 +32,11 @@ public class CourseController {
     }
     
     @GetMapping("/all")
-    public Response getCourses() {
+    public ResponseEntity<List<Map<String, Object>>> getCourses() {
         List<Map<String, Object>> courses = courseService.getAllCourses();
-        Response response = new Response();
-        if(courses.isEmpty()) {
-            response.setStatus(false);
-            response.setMessage("No courses found");
-        } else {
-            response.setStatus(true);
-            response.setData(courses);
-            response.setMessage(courses.size() + " courses in the system");
-        }
-        return response;
+        if(courses.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT ,"No courses found");
+        return ResponseEntity.ok(courses);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
