@@ -25,42 +25,79 @@ public class AttendanceService {
     private UserRepository userRepository;
     @Autowired
     private LessonAttendanceRepository lessonAttendanceRepository;
+    @Autowired
+    private  NotificationService notificationService;
 
+    // public String generateOtpForLesson(Long lessonId, String studentName) {
+
+    //     Lesson lesson = lessonRepository.findById(lessonId)
+    //         .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
+
+
+    //     User student = userRepository.findByUsername(studentName)
+    //         .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+
+    //     boolean isStudentEnrolled = lesson.getCourse()
+    //         .getEnrolledStudents()
+    //         .stream()
+    //         .anyMatch(s -> s.getUsername().equals(studentName));
+
+    //     if (!isStudentEnrolled) {
+    //         throw new IllegalArgumentException("Student is not enrolled in this course");
+    //     }
+
+
+    //     String otp = generateOtp();
+
+
+    //     LessonAttendance attendance = new LessonAttendance();
+    //     attendance.setLesson(lesson);
+    //     attendance.setOtp(otp);
+    //     attendance.setGeneratedAt(LocalDateTime.now());
+    //     attendance.setValidated(false);
+    //     attendance.setStudentId(student.getId());
+
+
+    //     lessonAttendanceRepository.save(attendance);
+
+    //     return otp;
+    // }
     public String generateOtpForLesson(Long lessonId, String studentName) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
             .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
-
-
+    
         User student = userRepository.findByUsername(studentName)
             .orElseThrow(() -> new IllegalArgumentException("Student not found"));
-
-
+    
         boolean isStudentEnrolled = lesson.getCourse()
             .getEnrolledStudents()
             .stream()
             .anyMatch(s -> s.getUsername().equals(studentName));
-
+    
         if (!isStudentEnrolled) {
             throw new IllegalArgumentException("Student is not enrolled in this course");
         }
-
-
+    
         String otp = generateOtp();
-
-
+    
         LessonAttendance attendance = new LessonAttendance();
         attendance.setLesson(lesson);
         attendance.setOtp(otp);
         attendance.setGeneratedAt(LocalDateTime.now());
         attendance.setValidated(false);
         attendance.setStudentId(student.getId());
-
-
+    
         lessonAttendanceRepository.save(attendance);
-
+    
+        // Notify the student
+        String notificationMessage = "An OTP has been generated for your lesson: " + lesson.getTitle() + ". OTP: " + otp;
+        notificationService.createNotification(student.getId(), notificationMessage, "OTP_GENERATION");
+    
         return otp;
     }
+    
 
     public boolean validateOtp(Long lessonId, String studentName,Long studentId, String otp) {
         Lesson lesson = lessonRepository.findById(lessonId)

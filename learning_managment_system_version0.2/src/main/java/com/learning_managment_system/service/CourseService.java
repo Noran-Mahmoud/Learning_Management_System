@@ -6,6 +6,7 @@ import com.learning_managment_system.model.User;
 import com.learning_managment_system.repository.CourseRepository;
 import com.learning_managment_system.repository.LessonRepository;
 import com.learning_managment_system.repository.UserRepository;
+import com.learning_managment_system.model.NotificationType;
 import jakarta.transaction.Transactional;
 
 import org.springframework.http.HttpStatus;
@@ -227,6 +228,10 @@ public class CourseService {
             course.getEnrolledStudents().add(user);
             userRepository.save(user);
 
+        // Notify the instructor
+        Long instructorId = course.getInstructor().getId();
+        String notificationMessage = "Student " + user.getUsername() + " has enrolled in your course: " + courseTitle;
+        notificationService.createNotification(instructorId, notificationMessage, NotificationType.ENROLLMENT_CONFIRMATION.name());
             // Add enrollment notification
             notificationService.createEnrollmentNotification(user.getId(), courseTitle);
         } else {

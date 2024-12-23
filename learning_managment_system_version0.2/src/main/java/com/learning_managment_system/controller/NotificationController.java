@@ -91,7 +91,7 @@ public class NotificationController {
     }
 
     @GetMapping("/show")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('INSTRUCTOR')" )
     public ResponseEntity<?> getStudentNotifications(
             Authentication authentication,
             @RequestParam(defaultValue = "true") Boolean onlyUnread
