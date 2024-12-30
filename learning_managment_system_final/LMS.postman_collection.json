@@ -1,0 +1,1367 @@
+{
+	"info": {
+		"_postman_id": "03a6b351-1c40-47e9-80db-e1106e7323cb",
+		"name": "LMS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "40441560",
+		"_collection_link": "https://lmsproject-8620.postman.co/workspace/LMS_Project-Workspace~f8c5012c-6545-4dd0-88d2-173a17f12a79/collection/40441560-03a6b351-1c40-47e9-80db-e1106e7323cb?action=share&source=collection_link&creator=40441560"
+	},
+	"item": [
+		{
+			"name": "Assessment",
+			"item": [
+				{
+					"name": "createAssignment",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Assignment1\",\r\n    \"fullMark\": 20,\r\n    \"courseTitle\": \"course2\"\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/assessments/assignment"
+					},
+					"response": []
+				},
+				{
+					"name": "createQuiz",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Quiz1\",\r\n    \"fullMark\": 20,\r\n    \"courseTitle\": \"course1\",\r\n    \"type\": \"SHORT_ANSWER\",\r\n    \"nquestions\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/assessments/quiz"
+					},
+					"response": []
+				},
+				{
+					"name": "submitAssignment",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "submissionFile",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/:assignmentTitle/submit_assignment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								":assignmentTitle",
+								"submit_assignment"
+							],
+							"variable": [
+								{
+									"key": "assignmentTitle",
+									"value": "assignment1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "submitQuiz",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"quiz1\",\r\n    \"courseTitle\": \"course1\",\r\n    \"questions\": [\r\n        {\r\n            \"questionOrder\": 1,\r\n            \"text\" : \"True\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/assessments/submit_quiz"
+					},
+					"response": []
+				},
+				{
+					"name": "gradeAssessment",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"studentName\" : \"student\",\r\n    \"grade\" : 2,\r\n    \"feedBack\": \"YOU DIDN'T SUBMIT !??!?!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/:assessmentTitle/mark",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								":assessmentTitle",
+								"mark"
+							],
+							"variable": [
+								{
+									"key": "assessmentTitle",
+									"value": "assignment1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAssessment",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/:assessmentTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								":assessmentTitle"
+							],
+							"variable": [
+								{
+									"key": "assessmentTitle",
+									"value": "quiz1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAssessmentsByUser",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/assessments"
+					},
+					"response": []
+				},
+				{
+					"name": "getAssessmentsByCourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/course/:courseTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								"course",
+								":courseTitle"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAssessment",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/:assessmentTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								":assessmentTitle"
+							],
+							"variable": [
+								{
+									"key": "assessmentTitle",
+									"value": "quiz1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Course",
+			"item": [
+				{
+					"name": "createCourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Course1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Course 1",
+									"type": "text"
+								},
+								{
+									"key": "duration",
+									"value": "Three Month",
+									"type": "text"
+								},
+								{
+									"key": "instructor",
+									"value": "instructor",
+									"type": "text"
+								}
+							]
+						},
+						"url": "http://localhost:8080/api/courses"
+					},
+					"response": []
+				},
+				{
+					"name": "createlesson",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"lesson1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle/lessons",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle",
+								"lessons"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addQuestions",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"marks\" : 1,\r\n        \"type\": \"T_F\",\r\n        \"correctAnswer\" : \"False\"\r\n    },\r\n    {\r\n        \"marks\": 3,\r\n        \"type\": \"MCQ\",\r\n        \"correctAnswer\" : \"A\",\r\n        \"options\": [\r\n            \"A\", \"B\", \"C\"\r\n        ]\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle/question_bank",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle",
+								"question_bank"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "Course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletecourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "instructor"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updatecourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "instructor"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"course1\",\r\n    \"duration\": \"Two Months\",\r\n    \"instructor\": {\r\n        \"id\": 2,\r\n        \"username\": \"instructor\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enroll",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle/enroll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle",
+								"enroll"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RemoveStudentFromCourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "instructor"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/removeStudent/:studentName/fromCourse/:courseTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"removeStudent",
+								":studentName",
+								"fromCourse",
+								":courseTitle"
+							],
+							"variable": [
+								{
+									"key": "studentName",
+									"value": "student2"
+								},
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "viewAllCourses",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/courses/all"
+					},
+					"response": []
+				},
+				{
+					"name": "ViewAvailableCourses",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student2",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/courses/available"
+					},
+					"response": []
+				},
+				{
+					"name": "ViewEnrolledStudents",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "instructor"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle/students",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle",
+								"students"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getQuestionsOfCourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/courses/get/:courseTitle/question_bank",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								"get",
+								":courseTitle",
+								"question_bank"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getLessonsByCourse",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/courses/:courseTitle/lessons",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"courses",
+								":courseTitle",
+								"lessons"
+							],
+							"variable": [
+								{
+									"key": "courseTitle",
+									"value": "course1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "registerFirstAdmin",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"8520\",\r\n    \"role\": \"ADMIN\",\r\n    \"firstName\": \"admin\",\r\n    \"phoneNumber\": \"01111111111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/users/admin/register"
+					},
+					"response": []
+				},
+				{
+					"name": "registerUser",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "admin",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"student\",\r\n    \"password\": \"8520\",\r\n    \"role\": \"student\",\r\n    \"firstName\": \"student\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/users/register"
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "8520",
+									"type": "text"
+								}
+							]
+						},
+						"url": "http://localhost:8080/api/users/login"
+					},
+					"response": []
+				},
+				{
+					"name": "getAllUsers",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "admin",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/users/all"
+					},
+					"response": []
+				},
+				{
+					"name": "getUserByUsername",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "student"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/:username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username",
+									"value": "student"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUserProfile",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"new@gmail\",\r\n    \"firstName\": \"Ali\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/users/update/:username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"update",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username",
+									"value": "instructor"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "admin",
+								"password": "8520"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/:username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username",
+									"value": "student2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Performance",
+			"item": [
+				{
+					"name": "getGradesByUser",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/grades/user/:username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								"grades",
+								"user",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username",
+									"value": "student"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getGradesByAssessment",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/grades/:assessmentTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								"grades",
+								":assessmentTitle"
+							],
+							"variable": [
+								{
+									"key": "assessmentTitle",
+									"value": "assignment1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSubmissions",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/assessments/:assessmentTitle/submissions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"assessments",
+								":assessmentTitle",
+								"submissions"
+							],
+							"variable": [
+								{
+									"key": "assessmentTitle",
+									"value": "assignment1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAssignmentFeedback",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "student",
+									"type": "text"
+								},
+								{
+									"key": "assignmentTitle",
+									"value": "Assignment1",
+									"type": "text"
+								}
+							]
+						},
+						"url": "http://localhost:8080/api/assessments/get_feedback"
+					},
+					"response": []
+				},
+				{
+					"name": "generateAttendance",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "studentName",
+									"value": "student",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/lessons/:lessonId/generate-otp",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"lessons",
+								":lessonId",
+								"generate-otp"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "markStudentAttendance",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "OTP",
+									"value": "683741",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/lessons/:lessonId/validate-otp",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"lessons",
+								":lessonId",
+								"validate-otp"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAttendance",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "instructor",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/lessons/attendance/:lessonId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"lessons",
+								"attendance",
+								":lessonId"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "getNotificatins(unreadOnly)",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"username": "student",
+								"password": "8520"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/show?onlyUnread=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"show"
+							],
+							"query": [
+								{
+									"key": "onlyUnread",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "markAsread",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "student"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/markAsRead?notificationId=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"markAsRead"
+							],
+							"query": [
+								{
+									"key": "notificationId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createNotification",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "8520",
+								"username": "admin"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/create?userId=2&content=tired&type=success",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"create"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "2"
+								},
+								{
+									"key": "content",
+									"value": "tired"
+								},
+								{
+									"key": "type",
+									"value": "success"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "inherit",
+		"inherit": {}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
